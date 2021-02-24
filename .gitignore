@@ -2,8 +2,7 @@
 /node_modules
 
 # production
-*.css
-bundle.js*
+/build
 
 # database
 /src/server/database/*.db
