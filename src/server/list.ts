@@ -1,14 +1,14 @@
-const path = require('path')
-const NeDB = require('nedb')
+import path from 'path'
+import NeDB from 'nedb'
 
-const uuid = require('uuid')
+import { v1 as uuidv1 } from 'uuid'
 
 const listDB = new NeDB({
   filename: path.join(__dirname, 'database/list.db'),
   autoload: true,
 })
 
-function getDBStatus(user, callback) {
+export function getDBStatus(user, callback) {
   console.log('[listDB] getDBStatus: ' + user.userid)
   listDB.findOne({ createUser: user.userKey, type: 'solo', status: true }, (soloError, solo) => {
     if (soloError) return callback({ type: 'soloError', fatal: true }, null)
@@ -24,7 +24,7 @@ function getDBStatus(user, callback) {
   })
 }
 
-function createDB(user, callback) {
+export function createDB(user, callback) {
   getDBStatus(user, (getDBStatusError, dbStatus) => {
     if (getDBStatusError && getDBStatusError.fatal) return callback(getDBStatusError, null)
     if (dbStatus) return callback({ type: 'alreadyCreated', fatal: false }, null)
@@ -32,7 +32,7 @@ function createDB(user, callback) {
       status: true,
       type: 'solo',
       createUser: user.userKey,
-      dbKey: uuid.v1().split('-').join(''),
+      dbKey: uuidv1().split('-').join(''),
       rate: 50,
       host: false,
       client: false,
@@ -53,7 +53,7 @@ function getOldDBStatus(user, callback) {
   })
 }
 
-function removeDuoDB(user, callback) {
+export function removeDuoDB(user, callback) {
   getDBStatus(user, (getDBStatusError, dbStatus) => {
     if (getDBStatusError && getDBStatusError.fatal) return callback(getDBStatusError, null)
     if (dbStatus.type === 'solo') return callback({ type: 'soloDB', fatal: false }, null)
@@ -128,7 +128,7 @@ function osaifuDivide(duoKey, selfKey, otherKey, selfType, otherType, callback) 
     })
 }
 
-function createDuoDB(user, hostUserKey, callback) {
+export function createDuoDB(user, hostUserKey, callback) {
   // clientがこの関数を呼び出すので先にclientを更新
   getDBStatus(user, (getDBStatusError, dbStatus) => {
     if (getDBStatusError && getDBStatusError.fatal) return callback(getDBStatusError, null)
@@ -156,7 +156,7 @@ function createDuoDB(user, hostUserKey, callback) {
             status: true,
             type: 'duo',
             createUser: hostUserKey,
-            dbKey: uuid.v1().split('-').join(''),
+            dbKey: uuidv1().split('-').join(''),
             rate: hostDBStatus.rate,
             host: hostUserKey,
             client: user.userKey,
@@ -218,7 +218,7 @@ async function insertData(list, db, type) {
               ...paymentData,
             }
       db.insert(newPayment, () => {
-        resolve()
+        resolve(true)
       })
     })
   }
@@ -235,7 +235,7 @@ function createOsaifuDB(dbkey) {
   })
 }
 
-function addPayment(user, payment, callback) {
+export function addPayment(user, payment, callback) {
   getDBStatus(user, (getDBStatusError, dbStatus) => {
     if (getDBStatusError && getDBStatusError.fatal) return callback(getDBStatusError, null)
     if (!dbStatus) return callback({ type: 'dbNotFound', fatal: false }, null)
@@ -247,7 +247,7 @@ function addPayment(user, payment, callback) {
   })
 }
 
-function getList(user, callback) {
+export function getList(user, callback) {
   getDBStatus(user, (getDBStatusError, dbStatus) => {
     if (getDBStatusError && getDBStatusError.fatal) return callback(getDBStatusError, null)
     if (!dbStatus) return callback({ type: 'dbNotFound', fatal: false }, null)
@@ -262,7 +262,7 @@ function getList(user, callback) {
   })
 }
 
-function deletePayment(user, id, callback) {
+export function deletePayment(user, id, callback) {
   getDBStatus(user, (getDBStatusError, dbStatus) => {
     if (getDBStatusError && getDBStatusError.fatal) return callback(getDBStatusError, null)
     if (!dbStatus) return callback({ type: 'dbNotFound', fatal: false }, null)
@@ -283,7 +283,7 @@ function updateStatus(status, callback) {
   })
 }
 
-function updateOsaifuname(user, osaifuname, callback) {
+export function updateOsaifuname(user, osaifuname, callback) {
   getDBStatus(user, (getDBStatusError, dbStatus) => {
     if (getDBStatusError && getDBStatusError.fatal) return callback(getDBStatusError, null)
     if (!dbStatus) return callback({ type: 'dbNotFound', fatal: false }, null)
@@ -297,7 +297,7 @@ function updateOsaifuname(user, osaifuname, callback) {
   })
 }
 
-function updateRate(user, rate, callback) {
+export function updateRate(user, rate, callback) {
   getDBStatus(user, (getDBStatusError, dbStatus) => {
     if (getDBStatusError && getDBStatusError.fatal) return callback(getDBStatusError, null)
     if (!dbStatus) return callback({ type: 'dbNotFound', fatal: false }, null)
@@ -309,16 +309,4 @@ function updateRate(user, rate, callback) {
       return callback(updateStatusError, { ...newDBStatus })
     })
   })
-}
-
-module.exports = {
-  getDBStatus,
-  createDB,
-  createDuoDB,
-  removeDuoDB,
-  addPayment,
-  getList,
-  deletePayment,
-  updateOsaifuname,
-  updateRate,
 }

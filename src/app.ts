@@ -1,7 +1,7 @@
-const express = require('express')
+import express from 'express'
 const app = express()
 
-const bodyParser = require('body-parser')
+import bodyParser from 'body-parser'
 app.use(bodyParser.urlencoded({ extended: true }))
 
 const client = './client/build'
@@ -20,10 +20,10 @@ app.use('/setting/othername', express.static(client))
 app.use('/setting/password', express.static(client))
 app.use('/setting/userdelete', express.static(client))
 
-const lib = require('./server/library')
-const libUser = require('./server/user')
-const libList = require('./server/list')
-const libConnect = require('./server/connect')
+import * as lib from './server/library'
+import * as libUser from './server/user'
+import * as libList from './server/list'
+import * as libConnect from './server/connect'
 
 // CORSを許可する
 app.use((req, res, next) => {

@@ -1,8 +1,8 @@
-const path = require('path')
-const NeDB = require('nedb')
+import path from 'path'
+import NeDB from 'nedb'
 
-const lib = require('./library')
-const uuid = require('uuid')
+import * as lib from './library'
+import { v1 as uuidv1 } from 'uuid'
 
 const userDB = new NeDB({
   filename: path.join(__dirname, 'database/user.db'),
@@ -10,13 +10,13 @@ const userDB = new NeDB({
   timestampData: true,
 })
 
-async function addUser(userdata, callback) {
+export async function addUser(userdata, callback) {
   if (await checkPastSignups(userdata.userid)) return callback({ type: 'alreadySignuped', fatal: false }, null)
   const clientToken = lib.createToken(userdata.clientid)
   const user = {
     userid: userdata.userid,
     passwordHash: lib.getHash(userdata.password),
-    userKey: lib.getHash(uuid.v1().split('-').join('')),
+    userKey: lib.getHash(uuidv1().split('-').join('')),
     username: userdata.userid,
     othername: 'あいて',
     clientList: [
@@ -34,7 +34,7 @@ async function addUser(userdata, callback) {
   })
 }
 
-function login(userdata, callback) {
+export function login(userdata, callback) {
   const hash = lib.getHash(userdata.password)
   const token = lib.createToken(userdata.clientid)
   const lastLogin = new Date().getTime()
@@ -69,7 +69,7 @@ function login(userdata, callback) {
   })
 }
 
-function deleteSession(session, callback) {
+export function deleteSession(session, callback) {
   getUser(session.userid, (getUserError, user) => {
     if (getUserError) return callback(getUserError, null)
     const newClientList = user.clientList.filter((e) => {
@@ -112,7 +112,7 @@ function updateUser(user, callback) {
   })
 }
 
-function authentication(session, callback) {
+export function authentication(session, callback) {
   getUser(session.userid, (err, user) => {
     if (err) return callback(err, null)
     if (lib.getToken(session.clientid, user) !== session.clientToken)
@@ -136,7 +136,7 @@ function authentication(session, callback) {
   })
 }
 
-function updateUsername(user, username, callback) {
+export function updateUsername(user, username, callback) {
   const newUser = {
     ...user,
     username,
@@ -146,7 +146,7 @@ function updateUsername(user, username, callback) {
   })
 }
 
-function updateOthername(user, othername, callback) {
+export function updateOthername(user, othername, callback) {
   const newUser = {
     ...user,
     othername,
@@ -156,7 +156,7 @@ function updateOthername(user, othername, callback) {
   })
 }
 
-function updatePassword(user, oldPassword, newPassword, callback) {
+export function updatePassword(user, oldPassword, newPassword, callback) {
   const oldHash = lib.getHash(oldPassword)
   const newHash = lib.getHash(newPassword)
   if (user.passwordHash !== oldHash) return callback({ type: 'oldPasswordWrong', fatal: false }, null)
@@ -170,7 +170,7 @@ function updatePassword(user, oldPassword, newPassword, callback) {
 }
 
 // /status から呼び出し
-function getUsername(userKey, callback) {
+export function getUsername(userKey, callback) {
   getUserByUserKey(userKey, (getUserError, user) => {
     callback(getUserError, user.username)
   })
@@ -184,23 +184,11 @@ function getUserByUserKey(userKey, callback) {
   })
 }
 
-function removeUser(user, password, callback) {
+export function removeUser(user, password, callback) {
   const hash = lib.getHash(password)
   if (!user || user.passwordHash !== hash) return callback({ type: 'passwordNotMatch', fatal: false }, null)
   userDB.remove({ userid: user.userid }, {}, (err) => {
     if (err) return callback({ type: 'DBError', fatal: true }, null)
     callback(null, true)
   })
-}
-
-module.exports = {
-  addUser,
-  login,
-  deleteSession,
-  authentication,
-  updateUsername,
-  updateOthername,
-  updatePassword,
-  getUsername,
-  removeUser,
 }

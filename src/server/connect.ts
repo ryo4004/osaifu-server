@@ -1,18 +1,18 @@
-const path = require('path')
-const NeDB = require('nedb')
+import path from 'path'
+import NeDB from 'nedb'
 
-const uuid = require('uuid')
+import { v4 as uuidv4 } from 'uuid'
 
-const lib = require('./library')
+import * as lib from './library'
 
 const connectDB = new NeDB({
   filename: path.join(__dirname, 'database/connect.db'),
   autoload: true,
 })
 
-function newConnect(user, callback) {
+export function newConnect(user, callback) {
   const expire = new Date().setHours(new Date().getHours() + 24)
-  const connectPass = uuid.v4().split('-')[0]
+  const connectPass = uuidv4().split('-')[0]
   const docs = {
     status: true,
     expire,
@@ -38,7 +38,7 @@ function newConnect(user, callback) {
   })
 }
 
-function getConnect(user, connectPass, callback) {
+export function getConnect(user, connectPass, callback) {
   console.log(lib.time() + '[connect] getConnect: ' + connectPass)
   connectDB.findOne({ connectPass }, (findError, connect) => {
     if (findError) return callback({ type: 'DBError', fatal: true }, null)
@@ -54,17 +54,11 @@ function getConnect(user, connectPass, callback) {
   })
 }
 
-function removeKey(connectPass, callback) {
+export function removeKey(connectPass, callback) {
   if (!connectPass) return callback(null)
   console.log(lib.time() + '[connect] disableKey: ' + connectPass)
   connectDB.remove({ connectPass }, {}, (err) => {
     if (err) return callback({ type: 'DBError', fatal: true })
     return callback(null)
   })
-}
-
-module.exports = {
-  newConnect,
-  getConnect,
-  removeKey,
 }
