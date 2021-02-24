@@ -1,7 +1,7 @@
 const path = require('path')
 const NeDB = require('nedb')
 
-const uuidv1 = require('uuid/v1')
+const uuid = require('uuid')
 
 const listDB = new NeDB({
   filename: path.join(__dirname, 'database/list.db'),
@@ -32,7 +32,7 @@ function createDB (user, callback) {
       status: true,
       type: 'solo',
       createUser: user.userKey,
-      dbKey: uuidv1().split('-').join(''),
+      dbKey: uuid.v1().split('-').join(''),
       rate: 50,
       host: false,
       client: false,
@@ -142,7 +142,7 @@ function createDuoDB (user, hostUserKey, callback) {
             status: true,
             type: 'duo',
             createUser: hostUserKey,
-            dbKey: uuidv1().split('-').join(''),
+            dbKey: uuid.v1().split('-').join(''),
             rate: hostDBStatus.rate,
             host: hostUserKey,
             client: user.userKey,

@@ -2,8 +2,7 @@ const path = require('path')
 const NeDB = require('nedb')
 
 const lib = require('./library')
-
-const uuidv1 = require('uuid/v1')
+const uuid = require('uuid')
 
 const userDB = new NeDB({
   filename: path.join(__dirname, 'database/user.db'),
@@ -17,7 +16,7 @@ async function addUser (userdata, callback) {
   const user = {
     userid: userdata.userid,
     passwordHash: lib.getHash(userdata.password),
-    userKey: lib.getHash(uuidv1().split('-').join('')),
+    userKey: lib.getHash(uuid.v1().split('-').join('')),
     username: userdata.userid,
     othername: 'あいて',
     clientList: [{
