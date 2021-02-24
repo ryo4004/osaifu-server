@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "ts-node ./src/app.ts",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "typecheck": "tsc --noEmit",
     "prettier": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,md}'"
   },
   "author": "",
